@@ -62,14 +62,14 @@ type Stats = {
 }
 
 const DEFAULT_CONFIG: WebsiteConfig = {
-  website_hero_title: 'IRKOP CENTRAL HUB',
+  website_hero_title: 'IRKOP CENTRAL',
   website_hero_description:
     'Satu pusat untuk aplikasi, tools, dan project digital IRKOP.',
   website_hero_button_text: 'Jelajahi Apps',
   website_hero_button_url: '#apps',
   website_about_title: 'Ekosistem digital IRKOP',
   website_about_description:
-    'IRKOP Central Hub menghubungkan aplikasi, tools, project, dan layanan digital dalam satu tempat.',
+    'IRKOP Central menghubungkan aplikasi, tools, project, dan layanan digital dalam satu tempat.',
   website_download_title: 'Download Aplikasi',
   website_download_description:
     'Dapatkan aplikasi IRKOP melalui link resmi dan gunakan versi terbaru.',
@@ -191,7 +191,7 @@ function DeviceVisual() {
       <div className="tablet">
         <div className="tablet-screen">
           <div className="tablet-header">
-            <span>IRKOP CENTRAL HUB</span>
+            <span>IRKOP CENTRAL</span>
             <b>•••</b>
           </div>
           <div className="tablet-heading">Your digital<br />ecosystem.</div>
@@ -206,7 +206,7 @@ function DeviceVisual() {
 
       <div className="floating-card floating-card-top">
         <Sparkles size={15} />
-        <span>One Central Hub</span>
+        <span>One Central</span>
       </div>
       <div className="floating-card floating-card-bottom">
         <Check size={15} />
@@ -343,7 +343,7 @@ export default function App() {
             <div className="hero-glow hero-glow-one" /><div className="hero-glow hero-glow-two" />
             <div className="container hero-inner">
               <div className="hero-copy reveal is-visible">
-                <div className="eyebrow"><span className="eyebrow-dot" />IRKOP CENTRAL HUB</div>
+                <div className="eyebrow"><span className="eyebrow-dot" />IRKOP CENTRAL</div>
                 <h1>{config.website_hero_title}</h1>
                 <p>{config.website_hero_description}</p>
                 <div className="hero-actions">
@@ -438,7 +438,7 @@ export default function App() {
                   <div className="about-panel-header">
                     <IrIcon small />
                     <div>
-                      <strong>IRKOP CENTRAL HUB</strong>
+                      <strong>IRKOP CENTRAL</strong>
                       <span>Connected ecosystem</span>
                     </div>
                   </div>
@@ -464,7 +464,7 @@ export default function App() {
                     <span className="feature-number">01</span>
                     <div>
                       <strong>Centralized</strong>
-                      <p>Semua aplikasi dan informasi berada dalam satu hub.</p>
+                      <p>Semua aplikasi dan informasi berada dalam satu.</p>
                     </div>
                   </div>
                   <div>
@@ -532,7 +532,7 @@ export default function App() {
         <div className="container footer-inner">
           <div className="footer-brand">
             <IrIcon small />
-            <span>IRKOP CENTRAL HUB</span>
+            <span>IRKOP CENTRAL</span>
           </div>
           <span>Apps • Tools • Projects</span>
           <a href="#top">Back to top <ArrowRight size={14} /></a>
