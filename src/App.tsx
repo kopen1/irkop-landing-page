@@ -24,6 +24,7 @@ type AppItem = {
   package_name: string | null
   description: string | null
   is_active: boolean
+  show_on_home: boolean
 }
 
 type Release = {
@@ -248,7 +249,7 @@ export default function App() {
       setLoading(true)
       const [configResult, appsResult, releasesResult, statsResult] = await Promise.all([
         supabase.from('global_config').select('key, value'),
-        supabase.from('apps').select('id, name, package_name, description, is_active').eq('is_active', true).order('name'),
+        supabase.from('apps').select('id, name, package_name, description, is_active, show_on_home').eq('is_active', true).eq('show_on_home', true).order('name'),
         supabase.from('app_releases').select('id, app_id, version, version_code, download_url, changelog, is_latest').eq('is_latest', true).order('created_at', { ascending: false }),
         supabase.from('v_website_stats').select('total_visitors, total_page_views, total_downloads, visitors_today, page_views_today, downloads_today').maybeSingle(),
       ])

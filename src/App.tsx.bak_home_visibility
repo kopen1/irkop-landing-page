@@ -1,3 +1,6 @@
+
+
+
 import { useEffect, useMemo, useState } from 'react'
 import {
   ArrowRight,
@@ -107,6 +110,39 @@ function AppIcon({ index }: { index: number }) {
   )
 }
 
+// ========== KOMPONEN FLOW VISUAL (Panel → Database → Apps) ==========
+function FlowVisual({ small = false }: { small?: boolean }) {
+  return (
+    <div className={small ? 'flow-visual-small' : ''}>
+      <div className="irkop-flow" aria-label="Panel Database Apps">
+        <div className="irkop-flow-pulse" />
+
+        <div className="irkop-flow-node">
+          <div className="irkop-flow-icon panel-icon">▣</div>
+          <div className="irkop-flow-title">Panel</div>
+          <div className="irkop-flow-subtitle">Kelola semua konten</div>
+        </div>
+
+        <div className="irkop-flow-link" />
+
+        <div className="irkop-flow-node">
+          <div className="irkop-flow-icon db-icon">⚡</div>
+          <div className="irkop-flow-title">Database</div>
+          <div className="irkop-flow-subtitle">Satu sumber data</div>
+        </div>
+
+        <div className="irkop-flow-link" />
+
+        <div className="irkop-flow-node">
+          <div className="irkop-flow-icon apps-icon">◈</div>
+          <div className="irkop-flow-title">Apps</div>
+          <div className="irkop-flow-subtitle">Data &amp; layanan terhubung</div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function DeviceVisual() {
   return (
     <div className="device-stage" aria-hidden="true">
@@ -116,14 +152,10 @@ function DeviceVisual() {
       <div className="device-back-card device-back-one">
         <div className="mini-window">
           <div className="mini-dots">
-            <i />
-            <i />
-            <i />
+            <i /><i /><i />
           </div>
           <div className="mini-lines">
-            <span />
-            <span />
-            <span />
+            <span /><span /><span />
           </div>
         </div>
       </div>
@@ -133,33 +165,21 @@ function DeviceVisual() {
       </div>
 
       <div className="phone">
-        <div className="phone-top">
-          <span />
-        </div>
+        <div className="phone-top"><span /></div>
         <div className="phone-screen">
           <div className="screen-header">
             <IrIcon small />
             <span>IRKOP</span>
           </div>
-
           <div className="screen-title">Apps &amp;<br />Projects</div>
-
           <div className="screen-card">
             <AppIcon index={0} />
-            <div>
-              <strong>EFB Switcher</strong>
-              <small>Latest version</small>
-            </div>
+            <div><strong>EFB Switcher</strong><small>Latest version</small></div>
           </div>
-
           <div className="screen-card">
             <AppIcon index={1} />
-            <div>
-              <strong>Tasbih Digital</strong>
-              <small>Ready to use</small>
-            </div>
+            <div><strong>Tasbih Digital</strong><small>Ready to use</small></div>
           </div>
-
           <div className="screen-footer">
             <span>3 Apps</span>
             <span>12 Releases</span>
@@ -187,7 +207,6 @@ function DeviceVisual() {
         <Sparkles size={15} />
         <span>One Central Hub</span>
       </div>
-
       <div className="floating-card floating-card-bottom">
         <Check size={15} />
         <span>Connected</span>
@@ -214,93 +233,51 @@ export default function App() {
 
   useEffect(() => {
     startTracking()
-
     const observer = new IntersectionObserver(
-      entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('is-visible')
-          }
-        })
-      },
+      entries => entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('is-visible')
+      }),
       { threshold: 0.12 }
     )
-
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el))
-
     return () => observer.disconnect()
   }, [])
 
   useEffect(() => {
     async function load() {
       setLoading(true)
-
-      const [configResult, appsResult, releasesResult, statsResult] =
-        await Promise.all([
-          supabase.from('global_config').select('key, value'),
-          supabase
-            .from('apps')
-            .select('id, name, package_name, description, is_active')
-            .eq('is_active', true)
-            .order('name'),
-          supabase
-            .from('app_releases')
-            .select(
-              'id, app_id, version, version_code, download_url, changelog, is_latest'
-            )
-            .eq('is_latest', true)
-            .order('created_at', { ascending: false }),
-          supabase
-            .from('v_website_stats')
-            .select(
-              'total_visitors, total_page_views, total_downloads, visitors_today, page_views_today, downloads_today'
-            )
-            .maybeSingle(),
-        ])
+      const [configResult, appsResult, releasesResult, statsResult] = await Promise.all([
+        supabase.from('global_config').select('key, value'),
+        supabase.from('apps').select('id, name, package_name, description, is_active').eq('is_active', true).order('name'),
+        supabase.from('app_releases').select('id, app_id, version, version_code, download_url, changelog, is_latest').eq('is_latest', true).order('created_at', { ascending: false }),
+        supabase.from('v_website_stats').select('total_visitors, total_page_views, total_downloads, visitors_today, page_views_today, downloads_today').maybeSingle(),
+      ])
 
       if (!configResult.error) {
         const next = { ...DEFAULT_CONFIG }
-
         for (const row of configResult.data ?? []) {
-          if (row.key in next) {
-            ;(next as Record<string, string>)[row.key] = row.value
-          }
+          if (row.key in next) (next as Record<string, string>)[row.key] = row.value
         }
-
         setConfig(next)
       }
-
-      if (!appsResult.error) {
-        setApps(appsResult.data ?? [])
-      }
-
-      if (!releasesResult.error) {
-        setReleases(releasesResult.data ?? [])
-      }
-
-      if (!statsResult.error && statsResult.data) {
-        setStats(statsResult.data)
-      }
-
+      if (!appsResult.error) setApps(appsResult.data ?? [])
+      if (!releasesResult.error) setReleases(releasesResult.data ?? [])
+      if (!statsResult.error && statsResult.data) setStats(statsResult.data)
       setLoading(false)
     }
-
     void load()
   }, [])
 
   useEffect(() => {
     const refreshReveal = () => {
       document.querySelectorAll('.reveal').forEach(el => {
-        const rect = el.getBoundingClientRect()
-        if (rect.top < window.innerHeight * 0.9) {
+        if (el.getBoundingClientRect().top < window.innerHeight * 0.9) {
           el.classList.add('is-visible')
         }
       })
     }
-
     window.addEventListener('scroll', refreshReveal, { passive: true })
     refreshReveal()
-
     return () => window.removeEventListener('scroll', refreshReveal)
   }, [loading, apps.length])
 
@@ -311,23 +288,10 @@ export default function App() {
   }, [releases])
 
   const statsItems = [
-    {
-      value: stats.total_downloads,
-      label: 'Downloads',
-    },
-    {
-      value: apps.length,
-      label: 'Apps',
-    },
-    {
-      value: releases.length,
-      label: 'Releases',
-    },
-    {
-      value: 100,
-      label: 'Free',
-      suffix: '%',
-    },
+    { value: stats.total_downloads, label: 'Downloads' },
+    { value: apps.length, label: 'Apps' },
+    { value: releases.length, label: 'Releases' },
+    { value: 100, label: 'Free', suffix: '%' },
   ]
 
   function handleHeroClick() {
@@ -338,50 +302,35 @@ export default function App() {
     })
   }
 
-  function closeMobile() {
-    setMobileMenu(false)
-  }
+  function closeMobile() { setMobileMenu(false) }
 
   function download(app: AppItem, release: Release) {
     void track('download', app.id)
-
-    if (release.download_url) {
-      window.open(release.download_url, '_blank', 'noopener,noreferrer')
-    }
+    if (release.download_url) window.open(release.download_url, '_blank', 'noopener,noreferrer')
   }
 
   const heroEnabled = config.website_section_hero_enabled !== 'false'
   const appsEnabled = config.website_section_apps_enabled !== 'false'
   const aboutEnabled = config.website_section_about_enabled !== 'false'
-  const downloadEnabled =
-    config.website_section_download_enabled !== 'false'
+  const downloadEnabled = config.website_section_download_enabled !== 'false'
 
   return (
     <div className="site-shell">
       <header className="irkop-navbar">
         <div className="nav-inner">
           <a className="brand" href="#top" onClick={closeMobile}>
-            <IrIcon small />
-            <span>IRKOP</span>
+            <IrIcon small /><span>IRKOP</span>
           </a>
-
           <nav className={`desktop-nav ${mobileMenu ? 'mobile-open' : ''}`}>
             <a href="#top" onClick={closeMobile}>Home</a>
             <a href="#apps" onClick={closeMobile}>Apps</a>
             <a href="#about" onClick={closeMobile}>About</a>
             <a href="#download" onClick={closeMobile}>Download</a>
           </nav>
-
           <a className="nav-button" href="#apps" onClick={closeMobile}>
-            Explore Apps
-            <ArrowRight size={15} />
+            Explore Apps <ArrowRight size={15} />
           </a>
-
-          <button
-            className="mobile-toggle"
-            onClick={() => setMobileMenu(value => !value)}
-            aria-label="Menu"
-          >
+          <button className="mobile-toggle" onClick={() => setMobileMenu(v => !v)} aria-label="Menu">
             {mobileMenu ? <X size={21} /> : <Menu size={21} />}
           </button>
         </div>
@@ -389,62 +338,28 @@ export default function App() {
 
       <main>
         {heroEnabled && (
-          <section
-            id="top"
-            className={`hero-section ${heroActive ? 'hero-active' : ''}`}
-            onClick={handleHeroClick}
-          >
-            <div className="hero-glow hero-glow-one" />
-            <div className="hero-glow hero-glow-two" />
-
+          <section id="top" className={`hero-section ${heroActive ? 'hero-active' : ''}`} onClick={handleHeroClick}>
+            <div className="hero-glow hero-glow-one" /><div className="hero-glow hero-glow-two" />
             <div className="container hero-inner">
               <div className="hero-copy reveal is-visible">
-                <div className="eyebrow">
-                  <span className="eyebrow-dot" />
-                  IRKOP CENTRAL HUB
-                </div>
-
-                <h1>
-                  {config.website_hero_title || 'IRKOP CENTRAL HUB'}
-                </h1>
-
-                <p>
-                  {config.website_hero_description ||
-                    'Satu pusat untuk aplikasi, tools, dan project digital IRKOP.'}
-                </p>
-
+                <div className="eyebrow"><span className="eyebrow-dot" />IRKOP CENTRAL HUB</div>
+                <h1>{config.website_hero_title}</h1>
+                <p>{config.website_hero_description}</p>
                 <div className="hero-actions">
-                  <a
-                    className="primary-button"
-                    href={config.website_hero_button_url || '#apps'}
-                    onClick={event => event.stopPropagation()}
-                  >
-                    {config.website_hero_button_text || 'Jelajahi Apps'}
-                    <ArrowRight size={17} />
+                  <a className="primary-button" href={config.website_hero_button_url || '#apps'} onClick={e => e.stopPropagation()}>
+                    {config.website_hero_button_text} <ArrowRight size={17} />
                   </a>
-
-                  <a
-                    className="secondary-button"
-                    href="#about"
-                    onClick={event => event.stopPropagation()}
-                  >
-                    Tentang IRKOP
-                  </a>
+                  <a className="secondary-button" href="#about" onClick={e => e.stopPropagation()}>Tentang IRKOP</a>
                 </div>
-
                 <div className="hero-trust">
                   <div className="trust-icons">
                     <span><Check size={12} /></span>
                     <span><Layers3 size={12} /></span>
                     <span><Rocket size={12} /></span>
                   </div>
-                  <div>
-                    <strong>Satu Panel • Satu Database</strong>
-                    <small>Banyak manfaat untuk ekosistem IRKOP</small>
-                  </div>
+                  <div><strong>Satu Panel • Satu Database</strong><small>Banyak manfaat untuk ekosistem IRKOP</small></div>
                 </div>
               </div>
-
               <DeviceVisual />
             </div>
           </section>
@@ -457,68 +372,36 @@ export default function App() {
                 <div>
                   <span className="section-kicker">APPLICATIONS</span>
                   <h2>Featured Apps</h2>
-                  <p>
-                    Aplikasi IRKOP yang tersedia untuk digunakan.
-                  </p>
+                  <p>Aplikasi IRKOP yang tersedia untuk digunakan.</p>
                 </div>
-
-                <a className="text-link" href="#download">
-                  Lihat Download
-                  <ChevronRight size={16} />
-                </a>
+                <a className="text-link" href="#download">Lihat Download <ChevronRight size={16} /></a>
               </div>
-
               {loading ? (
                 <div className="app-grid">
-                  {[1, 2, 3].map(item => (
-                    <div className="app-card skeleton-card" key={item} />
-                  ))}
+                  {[1,2,3].map(i => <div className="app-card skeleton-card" key={i} />)}
                 </div>
               ) : apps.length === 0 ? (
-                <div className="empty-card">
-                  Belum ada aplikasi aktif.
-                </div>
+                <div className="empty-card">Belum ada aplikasi aktif.</div>
               ) : (
                 <div className="app-grid">
                   {apps.map((app, index) => {
                     const release = releaseByApp.get(app.id)
-
                     return (
                       <article className="app-card reveal" key={app.id}>
                         <div className="app-card-top">
                           <AppIcon index={index} />
-
-                          {release && (
-                            <span className="version-badge">
-                              v{release.version}
-                            </span>
-                          )}
+                          {release && <span className="version-badge">v{release.version}</span>}
                         </div>
-
                         <h3>{app.name}</h3>
-
-                        <p className="changelog">
-                          {release?.changelog ||
-                            'Aplikasi digital dari ekosistem IRKOP.'}
-                        </p>
-
+                        <p className="changelog">{release?.changelog || 'Aplikasi digital dari ekosistem IRKOP.'}</p>
                         <div className="app-card-footer">
-                          <span>
-                            {app.package_name || 'IRKOP Application'}
-                          </span>
-
+                          <span>{app.package_name || 'IRKOP Application'}</span>
                           {release?.download_url ? (
-                            <button
-                              className="small-download"
-                              onClick={() => download(app, release)}
-                            >
-                              <Download size={14} />
-                              Download
+                            <button className="small-download" onClick={() => download(app, release)}>
+                              <Download size={14} /> Download
                             </button>
                           ) : (
-                            <span className="details-label">
-                              Coming soon
-                            </span>
+                            <span className="details-label">Coming soon</span>
                           )}
                         </div>
                       </article>
@@ -545,14 +428,12 @@ export default function App() {
           </div>
         </section>
 
-
-
-
+        {/* ======== ABOUT DENGAN FLOW VISUAL ======== */}
         {aboutEnabled && (
           <section id="about" className="about-section content-section">
             <div className="container about-grid">
               <div className="about-visual reveal">
-                <div className="about-panel">
+                <div className="about-panel" style={{ overflow: 'visible', minHeight: '280px' }}>
                   <div className="about-panel-header">
                     <IrIcon small />
                     <div>
@@ -561,22 +442,8 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className="about-flow">
-                    <div className="flow-node">
-                      <Layers3 size={19} />
-                      <span>Panel</span>
-                    </div>
-                    <div className="flow-line" />
-                    <div className="flow-node active">
-                      <span className="supabase-mark">⚡</span>
-                      <span>Database</span>
-                    </div>
-                    <div className="flow-line" />
-                    <div className="flow-node">
-                      <Rocket size={19} />
-                      <span>Apps</span>
-                    </div>
-                  </div>
+                  {/* ==== FLOW VISUAL (Panel → Database → Apps) ==== */}
+                  <FlowVisual small />
 
                   <div className="about-checks">
                     <span><Check size={14} /> Satu sumber data</span>
@@ -591,7 +458,6 @@ export default function App() {
                 <span className="section-kicker">ABOUT IRKOP</span>
                 <h2>{config.website_about_title}</h2>
                 <p>{config.website_about_description}</p>
-
                 <div className="feature-list">
                   <div>
                     <span className="feature-number">01</span>
@@ -600,7 +466,6 @@ export default function App() {
                       <p>Semua aplikasi dan informasi berada dalam satu hub.</p>
                     </div>
                   </div>
-
                   <div>
                     <span className="feature-number">02</span>
                     <div>
@@ -608,7 +473,6 @@ export default function App() {
                       <p>Panel, database, dan landing page terhubung.</p>
                     </div>
                   </div>
-
                   <div>
                     <span className="feature-number">03</span>
                     <div>
@@ -621,50 +485,33 @@ export default function App() {
             </div>
           </section>
         )}
-        
-        
 
         {downloadEnabled && (
           <section id="download" className="download-section content-section">
             <div className="container">
               <div className="download-box reveal">
                 <div className="download-glow" />
-
                 <div className="download-copy">
                   <span className="section-kicker light">DOWNLOAD</span>
                   <h2>{config.website_download_title}</h2>
                   <p>{config.website_download_description}</p>
                 </div>
-
                 <div className="download-list">
                   {apps.length === 0 ? (
-                    <div className="download-empty">
-                      Belum ada aplikasi yang tersedia.
-                    </div>
+                    <div className="download-empty">Belum ada aplikasi yang tersedia.</div>
                   ) : (
                     apps.map((app, index) => {
                       const release = releaseByApp.get(app.id)
-
                       return (
                         <div className="download-row" key={app.id}>
                           <AppIcon index={index} />
-
                           <div className="download-row-info">
                             <strong>{app.name}</strong>
-                            <span>
-                              {release
-                                ? `Latest v${release.version}`
-                                : 'Release belum tersedia'}
-                            </span>
+                            <span>{release ? `Latest v${release.version}` : 'Release belum tersedia'}</span>
                           </div>
-
                           {release?.download_url ? (
-                            <button
-                              className="download-row-button"
-                              onClick={() => download(app, release)}
-                            >
-                              Download
-                              <ExternalLink size={14} />
+                            <button className="download-row-button" onClick={() => download(app, release)}>
+                              Download <ExternalLink size={14} />
                             </button>
                           ) : (
                             <span className="not-ready">Unavailable</span>
@@ -686,13 +533,8 @@ export default function App() {
             <IrIcon small />
             <span>IRKOP CENTRAL HUB</span>
           </div>
-
           <span>Apps • Tools • Projects</span>
-
-          <a href="#top">
-            Back to top
-            <ArrowRight size={14} />
-          </a>
+          <a href="#top">Back to top <ArrowRight size={14} /></a>
         </div>
       </footer>
     </div>
