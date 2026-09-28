@@ -535,7 +535,10 @@ export default function App() {
             <span>IRKOP CENTRAL</span>
           </div>
           <span>Apps • Tools • Projects</span>
-          <a href="#top">Back to top <ArrowRight size={14} /></a>
+          <div className="footer-links">
+            <a href="/privacy-policy.html">Privacy Policy</a>
+            <a href="#top">Back to top <ArrowRight size={14} /></a>
+          </div>
         </div>
       </footer>
     </div>
